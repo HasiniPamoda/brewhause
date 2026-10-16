@@ -1,0 +1,17 @@
+@import "tailwindcss";
+
+@theme {
+  --color-espresso: #3b2314;
+  --color-roast: #5c3a21;
+  --color-caramel: #c68b59;
+  --color-latte: #e6d5c0;
+  --color-cream: #f5ebdd;
+  --color-foam: #fbf7f0;
+
+  --font-display: "Playfair Display", serif;
+  --font-sans: "Inter", sans-serif;
+}
+
+body {
+  @apply bg-foam text-espresso font-sans antialiased;
+}
