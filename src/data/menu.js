@@ -1,6 +1,6 @@
 export const categories = ['All', 'Coffee', 'Cold Drinks', 'Tea & More', 'Pastries']
 
-export const menuItems = [
+const items = [
   // Coffee
   { id: 1, name: 'Espresso', category: 'Coffee', temp: 'hot', vegan: true, price: 3.0, emoji: '☕', description: 'A bold double shot with a rich golden crema.' },
   { id: 2, name: 'Americano', category: 'Coffee', temp: 'hot', vegan: true, price: 3.5, emoji: '☕', description: 'Espresso topped with hot water for a smooth, long cup.' },
@@ -27,6 +27,27 @@ export const menuItems = [
   { id: 17, name: 'Vegan Banana Bread', category: 'Pastries', temp: 'none', vegan: true, price: 3.75, emoji: '🍞', description: 'Moist, naturally sweet, and packed with walnuts.' },
   { id: 18, name: 'Cinnamon Roll', category: 'Pastries', temp: 'none', vegan: false, price: 4.0, emoji: '🥮', description: 'Warm and gooey with cream cheese frosting.' },
 ]
+
+// Load every image in the folder. Vite handles the file paths for us.
+const images = import.meta.glob('../assets/images/*.{jpg,jpeg,png,webp}', {
+  eager: true,
+  import: 'default',
+})
+
+// "Signature Latte" -> "signature-latte"
+const toSlug = (name) => name.toLowerCase().replace(/[^a-z0-9]+/g, '-')
+
+// Find the photo whose filename matches the item name
+const findImage = (item) =>
+  Object.entries(images).find(([path]) => {
+    const file = path.split('/').pop().replace(/\.\w+$/, '')
+    return file === toSlug(item.name)
+  })?.[1]
+
+export const menuItems = items.map((item) => ({
+  ...item,
+  image: findImage(item),
+}))
 
 // Highest price on the menu, rounded up. Used by the price slider.
 export const MAX_PRICE = Math.ceil(Math.max(...menuItems.map((item) => item.price)))

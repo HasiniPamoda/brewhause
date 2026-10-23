@@ -21,3 +21,4 @@ A warm, interactive coffee shop web app built with React and Tailwind CSS.
 ## Progress
 - [x] Day 1: Project setup
 - [x] Day 2: Layout, navbar, footer and core pages
+- [x] Day 3: Interactive menu with filters and drink customization
