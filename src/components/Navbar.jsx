@@ -4,6 +4,8 @@ import { Link, NavLink } from 'react-router-dom'
 const links = [
   { to: '/', label: 'Home' },
   { to: '/menu', label: 'Menu' },
+  { to: '/gallery', label: 'Gallery' },
+  { to: '/reviews', label: 'Reviews' },
   { to: '/about', label: 'About' },
   { to: '/contact', label: 'Contact' },
 ]
@@ -24,7 +26,7 @@ export default function Navbar() {
         </Link>
 
         {/* Desktop links */}
-        <ul className="hidden items-center gap-8 md:flex">
+        <ul className="hidden items-center gap-5 md:flex lg:">
           {links.map((link) => (
             <li key={link.to}>
               <NavLink to={link.to} end className={linkClass}>
