@@ -1,6 +1,6 @@
 import StarDisplay from './StarDisplay'
 
-export default function ReviewCard({ review }) {
+export default function ReviewCard({ review, canDelete, onDelete }) {
   const initials = review.name
     .split(' ')
     .map((part) => part[0])
@@ -8,10 +8,11 @@ export default function ReviewCard({ review }) {
     .join('')
     .toUpperCase()
 
-  const date = new Date(`${review.date}T00:00:00`).toLocaleDateString(
-    undefined,
-    { year: 'numeric', month: 'short', day: 'numeric' }
-  )
+  const date = new Date(`${review.date}T00:00:00`).toLocaleDateString(undefined, {
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric',
+  })
 
   return (
     <li className="animate-fade-up rounded-2xl bg-white p-6 shadow-sm">
@@ -41,6 +42,17 @@ export default function ReviewCard({ review }) {
           </div>
 
           <p className="mt-3 leading-relaxed text-roast">{review.comment}</p>
+
+          {canDelete && (
+            <button
+              onClick={() => {
+                if (window.confirm('Delete your review?')) onDelete(review.id)
+              }}
+              className="mt-3 text-sm text-roast underline transition hover:text-red-600"
+            >
+              Delete my review
+            </button>
+          )}
         </div>
       </div>
     </li>

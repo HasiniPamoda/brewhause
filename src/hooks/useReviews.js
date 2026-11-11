@@ -1,37 +1,41 @@
 import { useEffect, useState } from 'react'
-import { seedReviews } from '../data/reviews'
-
-const STORAGE_KEY = 'brewhaus-reviews'
-
-function loadReviews() {
-  try {
-    const saved = localStorage.getItem(STORAGE_KEY)
-    return saved ? JSON.parse(saved) : []
-  } catch {
-    return []
-  }
-}
+import { api } from '../lib/api'
+import { useAuth } from '../context/useAuth'
 
 export function useReviews() {
-  // Only reviews written by the visitor are saved. The seed reviews stay in code.
-  const [userReviews, setUserReviews] = useState(loadReviews)
+  const { token } = useAuth()
+  const [reviews, setReviews] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [error, setError] = useState('')
 
   useEffect(() => {
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(userReviews))
-    } catch {
-      // Storage can be full or blocked. Reviews still work without it.
-    }
-  }, [userReviews])
+    let cancelled = false
 
-  const addReview = (review) => {
-    const newReview = {
-      ...review,
-      id: `user-${Date.now()}`,
-      date: new Date().toISOString().slice(0, 10),
+    api('/reviews')
+      .then((data) => {
+        if (!cancelled) setReviews(data)
+      })
+      .catch((err) => {
+        if (!cancelled) setError(err.message)
+      })
+      .finally(() => {
+        if (!cancelled) setLoading(false)
+      })
+
+    return () => {
+      cancelled = true
     }
-    setUserReviews((prev) => [newReview, ...prev])
+  }, [])
+
+  const addReview = async (review) => {
+    const created = await api('/reviews', { method: 'POST', body: review, token })
+    setReviews((prev) => [created, ...prev])
   }
 
-  return { reviews: [...userReviews, ...seedReviews], addReview }
+  const removeReview = async (id) => {
+    await api(`/reviews/${id}`, { method: 'DELETE', token })
+    setReviews((prev) => prev.filter((review) => review.id !== id))
+  }
+
+  return { reviews, loading, error, addReview, removeReview }
 }

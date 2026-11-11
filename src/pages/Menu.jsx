@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { categories, menuItems, MAX_PRICE } from '../data/menu'
+import { useCart } from '../context/useCart'
 import CategoryTabs from '../components/CategoryTabs'
 import FilterBar from '../components/FilterBar'
 import MenuItem from '../components/MenuItem'
@@ -14,6 +15,7 @@ const defaultFilters = {
 }
 
 export default function Menu() {
+  const { addItem } = useCart()
   const [filters, setFilters] = useState(defaultFilters)
   const [customizing, setCustomizing] = useState(null)
 
@@ -24,9 +26,8 @@ export default function Menu() {
 
   const resetFilters = () => setFilters(defaultFilters)
 
-  // Temporary: tomorrow this will call the real cart
   const handleAdd = (order) => {
-    console.log('Added to cart:', order)
+    addItem(order)
     setCustomizing(null)
   }
 

@@ -2,15 +2,17 @@ import { useState } from 'react'
 import { menuItems } from '../data/menu'
 import StarInput from './StarInput'
 
-const initialForm = { name: '', drink: '', rating: 0, comment: '' }
+const initialForm = { drink: '', rating: 0, comment: '' }
 const MAX_COMMENT = 300
 
 const inputClass =
   'mt-1 w-full rounded-lg border border-latte bg-white px-4 py-3 outline-none focus:border-caramel focus:ring-2 focus:ring-caramel/30'
 
-export default function ReviewForm({ onSubmit }) {
+export default function ReviewForm({ userName, onSubmit }) {
   const [form, setForm] = useState(initialForm)
   const [errors, setErrors] = useState({})
+  const [serverError, setServerError] = useState('')
+  const [submitting, setSubmitting] = useState(false)
   const [sent, setSent] = useState(false)
 
   const handleChange = (e) => {
@@ -20,56 +22,53 @@ export default function ReviewForm({ onSubmit }) {
 
   const validate = () => {
     const newErrors = {}
-    if (!form.name.trim()) newErrors.name = 'Please enter your name.'
-    if (form.rating === 0) newErrors.rating = 'Please choose a star rating.'
+    if (form.rating === 0) newErrors.rating = 'Choose a star rating.'
     if (form.comment.trim().length < 10)
-      newErrors.comment = 'Please write at least 10 characters.'
+      newErrors.comment = 'Write at least 10 characters.'
     return newErrors
   }
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
+    setServerError('')
+
     const newErrors = validate()
     setErrors(newErrors)
     if (Object.keys(newErrors).length > 0) return
 
-    onSubmit({
-      name: form.name.trim(),
-      drink: form.drink,
-      rating: form.rating,
-      comment: form.comment.trim(),
-    })
-    setForm(initialForm)
-    setSent(true)
+    setSubmitting(true)
+    try {
+      await onSubmit({
+        drink: form.drink,
+        rating: form.rating,
+        comment: form.comment.trim(),
+      })
+      setForm(initialForm)
+      setSent(true)
+    } catch (err) {
+      setServerError(err.message)
+    } finally {
+      setSubmitting(false)
+    }
   }
 
   return (
     <form onSubmit={handleSubmit} noValidate className="space-y-5">
+      <p className="text-sm text-roast">
+        Posting as <span className="font-semibold text-espresso">{userName}</span>
+      </p>
+
       {sent && (
-        <div
-          role="status"
-          className="rounded-lg bg-green-100 px-4 py-3 text-sm text-green-800"
-        >
-          Thank you! Your review has been posted.
+        <div role="status" className="rounded-lg bg-green-100 px-4 py-3 text-sm text-green-800">
+          Review posted. Thank you!
         </div>
       )}
 
-      <div>
-        <label htmlFor="review-name" className="font-medium">
-          Your name
-        </label>
-        <input
-          id="review-name"
-          name="name"
-          maxLength={40}
-          value={form.name}
-          onChange={handleChange}
-          className={inputClass}
-        />
-        {errors.name && (
-          <p className="mt-1 text-sm text-red-600">{errors.name}</p>
-        )}
-      </div>
+      {serverError && (
+        <div role="alert" className="rounded-lg bg-red-100 px-4 py-3 text-sm text-red-800">
+          {serverError}
+        </div>
+      )}
 
       <div>
         <label htmlFor="review-drink" className="font-medium">
@@ -103,9 +102,7 @@ export default function ReviewForm({ onSubmit }) {
             }}
           />
         </div>
-        {errors.rating && (
-          <p className="mt-1 text-sm text-red-600">{errors.rating}</p>
-        )}
+        {errors.rating && <p className="mt-1 text-sm text-red-600">{errors.rating}</p>}
       </div>
 
       <div>
@@ -131,9 +128,10 @@ export default function ReviewForm({ onSubmit }) {
 
       <button
         type="submit"
-        className="w-full rounded-full bg-caramel px-8 py-3 font-medium text-white transition hover:bg-roast"
+        disabled={submitting}
+        className="w-full rounded-full bg-caramel px-8 py-3 font-medium text-white transition hover:bg-roast disabled:opacity-60"
       >
-        Post Review
+        {submitting ? 'Posting...' : 'Post review'}
       </button>
     </form>
   )
